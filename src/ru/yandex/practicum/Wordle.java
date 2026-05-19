@@ -6,31 +6,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Wordle {
-    private static PrintWriter logger;
     private static final String DICTIONARY_PATH = "words_ru.txt";
     private static final String LOG_PATH = "logs/game.log";
 
     public static void main(String[] args) {
-        try {
-            new File("logs").mkdirs();
-            logger = new PrintWriter(new OutputStreamWriter(
-                    new FileOutputStream(LOG_PATH, true), StandardCharsets.UTF_8));
+        // Создаём папку для логов
+        new File("logs").mkdirs();
+
+        // Используем try-with-resources для автоматического закрытия логгера
+        try (PrintWriter logger = new PrintWriter(
+                new OutputStreamWriter(new FileOutputStream(LOG_PATH, true), StandardCharsets.UTF_8))) {
 
             logger.println("=== Новая игра ===");
             WordleDictionary dict = WordleDictionaryLoader.loadFromFile(DICTIONARY_PATH, logger);
-            playGame(dict);
+            playGame(dict, logger);
 
         } catch (Exception e) {
             System.err.println("Критическая ошибка: " + e.getMessage());
-            if (logger != null) {
-                logger.println("FATAL: " + e.getMessage());
-                e.printStackTrace(logger);
-                logger.close();
-            }
+            e.printStackTrace();
         }
     }
 
-    private static void playGame(WordleDictionary dictionary) {
+    private static void playGame(WordleDictionary dictionary, PrintWriter logger) {
         WordleGame game = new WordleGame(dictionary, logger);
         Scanner scanner = new Scanner(System.in);
 
@@ -66,6 +63,5 @@ public class Wordle {
             }
         }
         scanner.close();
-        if (logger != null) logger.close();
     }
 }

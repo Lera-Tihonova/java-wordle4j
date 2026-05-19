@@ -5,31 +5,32 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class WordleGame {
+    private static final int WORD_LENGTH = 5;
+    private static final int MAX_ATTEMPTS = 6;
+
     private final WordleDictionary dictionary;
     private final String secretWord;
     private int remainingAttempts;
-    private final List<String> attempts;
-    private final List<String> hints;
     private boolean isGameOver;
     private final Set<Character> knownLetters;
     private final Set<Character> notInWord;
     private final Map<Integer, Character> exactMatches;
     private final List<String> previousHints;
+    private String lastHint;
 
     public WordleGame(WordleDictionary dictionary, PrintWriter logger) {
         this.dictionary = dictionary;
         this.secretWord = dictionary.getRandomWord();
-        this.remainingAttempts = 6;
-        this.attempts = new ArrayList<>();
-        this.hints = new ArrayList<>();
+        this.remainingAttempts = MAX_ATTEMPTS;
         this.isGameOver = false;
         this.knownLetters = new HashSet<>();
         this.notInWord = new HashSet<>();
         this.exactMatches = new HashMap<>();
         this.previousHints = new ArrayList<>();
+        this.lastHint = "";
 
         if (logger != null) {
-            logger.println("Игра создана. Загадано: " + secretWord);
+            logger.println("Игра создана");
             logger.flush();
         }
     }
@@ -41,17 +42,15 @@ public class WordleGame {
 
         String normalized = WordleDictionary.normalizeWord(guess);
 
-        if (normalized.length() != 5) {
-            throw new WordNotInDictionaryException("Слово должно быть из 5 букв");
+        if (normalized.length() != WORD_LENGTH) {
+            throw new WordNotInDictionaryException("Слово должно быть из " + WORD_LENGTH + " букв");
         }
         if (!dictionary.containsWord(normalized)) {
             throw new WordNotInDictionaryException("Слова нет в словаре");
         }
 
-        attempts.add(normalized);
-        String hint = WordleDictionary.getHintPattern(normalized, secretWord);
-        hints.add(hint);
-        updateKnowledge(normalized, hint);
+        lastHint = WordleDictionary.getHintPattern(normalized, secretWord);
+        updateKnowledge(normalized, lastHint);
 
         if (normalized.equals(secretWord)) {
             isGameOver = true;
@@ -86,7 +85,6 @@ public class WordleGame {
     public String getHint() {
         List<String> possible = dictionary.getPossibleWords(knownLetters, exactMatches, notInWord);
         possible.removeAll(previousHints);
-        possible.removeAll(attempts);
         if (possible.isEmpty()) {
             return null;
         }
@@ -96,10 +94,7 @@ public class WordleGame {
     }
 
     public String getLastHint() {
-        if (hints.isEmpty()) {
-            return "";
-        }
-        return hints.get(hints.size() - 1);
+        return lastHint;
     }
 
     public String getSecretWord() {
