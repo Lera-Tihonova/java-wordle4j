@@ -87,17 +87,30 @@ public class WordleGame {
         List<String> possible = dictionary.getPossibleWords(knownLetters, exactMatches, notInWord);
         possible.removeAll(previousHints);
         possible.removeAll(attempts);
-        if (possible.isEmpty()) return null;
+        if (possible.isEmpty()) {
+            return null;
+        }
         String hintWord = possible.get(new Random().nextInt(possible.size()));
         previousHints.add(hintWord);
         return hintWord;
     }
 
     public String getLastHint() {
-        return hints.isEmpty() ? "" : hints.get(hints.size() - 1);
+        if (hints.isEmpty()) {
+            return "";
+        }
+        return hints.get(hints.size() - 1);
     }
 
-    public String getSecretWord() { return secretWord; }
-    public int getRemainingAttempts() { return remainingAttempts; }
-    public boolean isGameOver() { return isGameOver; }
+    public String getSecretWord() {
+        return secretWord;
+    }
+
+    public int getRemainingAttempts() {
+        return remainingAttempts;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
 }
