@@ -30,7 +30,7 @@ public class WordleGame {
         this.lastHint = "";
 
         if (logger != null) {
-            logger.println("Игра создана");
+            logger.println("Игра создана. Слово загадано.");
             logger.flush();
         }
     }
@@ -50,7 +50,6 @@ public class WordleGame {
         }
 
         lastHint = WordleDictionary.getHintPattern(normalized, secretWord);
-        updateKnowledge(normalized, lastHint);
 
         if (normalized.equals(secretWord)) {
             isGameOver = true;
@@ -64,22 +63,6 @@ public class WordleGame {
         }
 
         return GameResult.CONTINUE;
-    }
-
-    private void updateKnowledge(String guess, String hint) {
-        char[] g = guess.toCharArray();
-        char[] h = hint.toCharArray();
-
-        for (int i = 0; i < g.length; i++) {
-            if (h[i] == '+') {
-                knownLetters.add(g[i]);
-                exactMatches.put(i, g[i]);
-            } else if (h[i] == '^') {
-                knownLetters.add(g[i]);
-            } else if (h[i] == '-' && !knownLetters.contains(g[i])) {
-                notInWord.add(g[i]);
-            }
-        }
     }
 
     public String getHint() {
